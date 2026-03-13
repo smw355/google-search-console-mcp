@@ -134,7 +134,11 @@ def register_property_tools(mcp: FastMCP) -> None:
                 if resp.status_code == 409:
                     return json.dumps({"success": False, "error": "Site already exists in GSC.", "siteUrl": site_url})
                 if resp.status_code == 403:
-                    return json.dumps({"success": False, "error": "Permission denied. Check your OAuth scopes.", "siteUrl": site_url})
+                    try:
+                        detail = resp.json()
+                    except Exception:
+                        detail = resp.text
+                    return json.dumps({"success": False, "error": "Permission denied.", "detail": detail, "siteUrl": site_url})
                 if resp.status_code == 400:
                     detail = resp.json() if resp.content else {}
                     return json.dumps({"success": False, "error": "Bad request — invalid site URL format.", "detail": detail, "siteUrl": site_url})
@@ -190,7 +194,11 @@ def register_property_tools(mcp: FastMCP) -> None:
                 if resp.status_code == 404:
                     return json.dumps({"success": False, "error": "Site not found in GSC.", "siteUrl": site_url})
                 if resp.status_code == 403:
-                    return json.dumps({"success": False, "error": "Permission denied. You may not have owner-level access.", "siteUrl": site_url})
+                    try:
+                        detail = resp.json()
+                    except Exception:
+                        detail = resp.text
+                    return json.dumps({"success": False, "error": "Permission denied.", "detail": detail, "siteUrl": site_url})
                 resp.raise_for_status()
                 return json.dumps({"success": True, "deleted": site_url})
         except httpx.HTTPStatusError as e:

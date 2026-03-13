@@ -50,7 +50,10 @@ def register_sitemap_tools(mcp: FastMCP) -> None:
         try:
             params = {}
             if sitemap_index:
-                params["sitemapIndex"] = encode_feedpath(sitemap_index)
+                # Pass raw value — httpx encodes query params automatically.
+                # encode_feedpath() is for path segments only; using it here
+                # would cause double-encoding.
+                params["sitemapIndex"] = sitemap_index
 
             async with httpx.AsyncClient(
                 headers=auth_headers(token.token), timeout=30.0
@@ -167,9 +170,14 @@ def register_sitemap_tools(mcp: FastMCP) -> None:
                         "detail": detail,
                     })
                 if resp.status_code == 403:
+                    try:
+                        detail = resp.json()
+                    except Exception:
+                        detail = resp.text
                     return json.dumps({
                         "success": False,
-                        "error": "Permission denied. Verify you have owner access to this GSC property.",
+                        "error": "Permission denied.",
+                        "detail": detail,
                     })
                 if resp.status_code == 404:
                     return json.dumps({
@@ -235,9 +243,14 @@ def register_sitemap_tools(mcp: FastMCP) -> None:
                         "sitemapUrl": sitemap_url,
                     })
                 if resp.status_code == 403:
+                    try:
+                        detail = resp.json()
+                    except Exception:
+                        detail = resp.text
                     return json.dumps({
                         "success": False,
-                        "error": "Permission denied. Verify you have owner access to this GSC property.",
+                        "error": "Permission denied.",
+                        "detail": detail,
                     })
                 resp.raise_for_status()
                 return json.dumps({"success": True, "deleted": sitemap_url})
