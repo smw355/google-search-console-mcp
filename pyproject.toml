@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "gsc-mcp-oauth"
+version = "1.0.0"
+description = "Google Search Console MCP Server with OAuth 2.1 for Cloud Run / Obot"
+requires-python = ">=3.10"
+dependencies = [
+    "fastmcp>=3.1.0",
+    "httpx>=0.28.1",
+]
+
+[project.scripts]
+gsc-mcp-oauth = "gsc_mcp_oauth.__main__:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gsc_mcp_oauth"]
